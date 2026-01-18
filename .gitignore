@@ -1,0 +1,18 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad
+*.xccheckout
+*.xcscheme
+*.xschedstat
+*.xcscmblueprint
+*.moved-aside
+*.app
+*.dmg
+
+# macOS
+.DS_Store
+
+# Web temp
+dist/

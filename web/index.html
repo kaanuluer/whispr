@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whispr — The Quiet Clipboard Manager for macOS</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #FF9500;
+            --orange-dark: #E68600;
+            --bg: #FFFFFF;
+            --text: #1D1D1F;
+            --text-secondary: #86868B;
+            --surface: #F5F5F7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --text: #F5F5F7;
+                --text-secondary: #86868B;
+                --surface: #1D1D1F;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--orange);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--orange);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 20px rgba(255, 149, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            background-color: var(--orange-dark);
+            box-shadow: 0 15px 30px rgba(255, 149, 0, 0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            padding: 6rem 0;
+        }
+
+        .feature-card {
+            background-color: var(--surface);
+            padding: 3rem;
+            border-radius: 32px;
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+            border: 1px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 149, 0, 0.2);
+        }
+
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+
+        .philosophy {
+            padding: 8rem 0;
+            background-color: var(--surface);
+            border-radius: 48px;
+            margin: 4rem 0;
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .philosophy h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        .philosophy p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .privacy-box {
+            background: var(--bg);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border-left: 6px solid var(--orange);
+        }
+
+        .privacy-box h4 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background-color: var(--orange);
+            color: white;
+            border-radius: 99px;
+            font-size: 0.875rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .coming-soon {
+            background: linear-gradient(180deg, rgba(255, 149, 0, 0.05) 0%, rgba(255, 149, 0, 0) 100%);
+            border: 2px solid rgba(255, 149, 0, 0.2);
+            padding: 6rem 4rem;
+            border-radius: 48px;
+            margin: 6rem 0;
+            text-align: center;
+        }
+
+        .coming-soon h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.04em;
+        }
+
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .ai-item {
+            text-align: left;
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: 20px;
+        }
+
+        .ai-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--orange);
+        }
+
+        /* Content Sections */
+        .content-block {
+            padding: 6rem 0;
+            border-top: 1px solid var(--surface);
+        }
+
+        .content-block h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            letter-spacing: -0.03em;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            padding: 2.5rem;
+            background: var(--surface);
+            border-radius: 24px;
+        }
+
+        .guide-card h4 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--orange);
+        }
+
+        .release-log {
+            max-width: 700px;
+        }
+
+        .version-tag {
+            font-weight: 800;
+            color: var(--orange);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .release-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .release-list {
+            list-style: none;
+            margin-bottom: 3rem;
+        }
+
+        .release-list li {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .release-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--orange);
+            font-weight: 700;
+        }
+
+        footer {
+            padding: 8rem 0 4rem;
+            border-top: 1px solid var(--surface);
+            margin-top: 4rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            text-align: left;
+        }
+
+        .footer-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--orange);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links h5 {
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .footer-links a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--orange);
+        }
+
+        .app-preview {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            background: linear-gradient(135deg, #FF9500 0%, #FF5E00 100%);
+            margin: 4rem auto;
+            border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-preview::after {
+            content: "Minimal. Native. Orange.";
+            color: white;
+            font-weight: 800;
+            font-size: 2rem;
+            opacity: 0.2;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.125rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="8" width="3" height="8" rx="1.5" fill="currentColor"/>
+                    <rect x="10.5" y="4" width="3" height="16" rx="1.5" fill="currentColor"/>
+                    <rect x="17" y="10" width="3" height="4" rx="1.5" fill="currentColor"/>
+                </svg>
+                Whispr
+            </div>
+            <a href="Whispr.dmg" class="cta-button" style="padding: 0.5rem 1.5rem; font-size: 0.875rem;">Download</a>
+        </header>
+
+        <section class="hero">
+            <h1>The quietest way to manage your history.</h1>
+            <p>A privacy-first clipboard manager that stays out of your way until you need it. Designed specifically for macOS with power, speed, and silence in mind.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="Whispr.dmg" class="cta-button">Download for macOS</a>
+                <a href="#features" class="cta-button" style="background: var(--surface); color: var(--text); box-shadow: none;">Learn more</a>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="feature-card">
+                <span class="icon">🚀</span>
+                <h3>Native Performance</h3>
+                <p>Written in 100% SwiftUI and Swift. Whispr is ultra-lightweight, energy-efficient, and feels exactly like a part of your Mac. No Electron, no bloat.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🔒</span>
+                <h3>Safety by Default</h3>
+                <p>Whispr intelligently detects and masks sensitive data. Credit cards and secure fields are automatically obscured, keeping your workspace safe from prying eyes.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">📌</span>
+                <h3>Intentional Focus</h3>
+                <p>Our unique 3-pin rule ensures your most vital snippets are always at the top without cluttering your view. Stay organized without even trying.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">✨</span>
+                <h3>Duplicate-Free</h3>
+                <p>Whispr automatically cleans your history. If you copy the same content twice, it simply moves to the top. No more scrolling through identical entries.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">⚡️</span>
+                <h3>Lightning Fast</h3>
+                <p>Instant search and keyboard-first navigation mean you spend less time looking and more time creating. Copy, paste, and move on.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🎨</span>
+                <h3>Adaptive Design</h3>
+                <p>Whether you're in Light or Dark mode, Whispr adapts perfectly to your macOS accent colors and translucency settings. It's invisible until needed.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">📖</span>
+                <h3>Open Source</h3>
+                <p>Whispr is completely open-source. Transparency is the ultimate form of privacy. Audit the code yourself and contribute to the future of the app.</p>
+            </div>
+        </section>
+
+        <section class="philosophy">
+            <div class="container">
+                <div class="philosophy-grid">
+                    <div>
+                        <h2>Built for Silence.</h2>
+                        <p>Most tools scream for your attention. Whispr is designed to do the opposite. It lives in your menu bar, quietly observing, ready to assist only when you call for it.</p>
+                        <div class="privacy-box">
+                            <h4>The Privacy Promise</h4>
+                            <p>Everything stays on your Mac. No cloud syncing, no data collection, no telemetry. Your clipboard is your business, and we keep it that way.</p>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80" alt="Mac Desktop" style="width: 100%; border-radius: 24px; box-shadow: 0 40px 80px rgba(0,0,0,0.15);">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="coming-soon">
+            <span class="badge">Version 1.1 — Coming Soon</span>
+            <h2>Intelligence that lives on your Mac.</h2>
+            <p style="max-width: 700px; margin: 0 auto; font-size: 1.25rem;">We are integrating powerful local LLM capabilities directly into Whispr. No internet required, no data leaves your device.</p>
+            
+            <div class="ai-grid">
+                <div class="ai-item">
+                    <strong>✨ Smart Clean</strong>
+                    <p>Instantly remove tracking parameters and messy formatting from copied links and text.</p>
+                </div>
+                <div class="ai-item">
+                    <strong>📝 Summarize</strong>
+                    <p>Get the gist of long articles or meeting notes directly from your clipboard menu.</p>
+                </div>
+                <div class="ai-item">
+                    <strong>✍️ Rewrite</strong>
+                    <p>Change the tone of your text or fix grammar locally before you paste it anywhere.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="user-guide" class="content-block">
+            <h2>User Guide</h2>
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <h4>01. Copy Anything</h4>
+                    <p>Whispr works silently in the background. Simply copy any text, link, or code snippet as you normally do.</p>
+                </div>
+                <div class="guide-card">
+                    <h4>02. Access Menu</h4>
+                    <p>Click the Whispr icon in your macOS menu bar or use the global shortcut <strong>⌥ ␣</strong> (Option + Space) to open the list.</p>
+                </div>
+                <div class="guide-card">
+                    <h4>03. One-Tap Paste</h4>
+                    <p>Click any item in the list to copy it back to your clipboard instantly. Use <strong>⌘V</strong> to paste it anywhere.</p>
+                </div>
+                <div class="guide-card">
+                    <h4>04. Smart Pinning</h4>
+                    <p>Hover over an item and click the pin icon. Your top 3 pinned items will always stay at the top for quick access.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="release-notes" class="content-block">
+            <h2>Release Notes</h2>
+            <div class="release-log">
+                <span class="version-tag">v1.0.0 — The Beginning</span>
+                <span class="release-date">January 18, 2026</span>
+                <ul class="release-list">
+                    <li>Core clipboard tracking engine with duplicate prevention.</li>
+                    <li>Privacy-first local storage (No cloud, no sync).</li>
+                    <li>Automatic credit card detection and secure masking.</li>
+                    <li>Smart Pinning system (Max 3 items).</li>
+                    <li>Customizable "Active Actions" interface.</li>
+                    <li>Native macOS Sonoma & Sequoia support.</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">Whispr</div>
+                    <p>The quiet clipboard manager for macOS.<br>Designed and built for privacy-conscious professionals.</p>
+                </div>
+                <div class="footer-links">
+                    <h5>Product</h5>
+                    <a href="Whispr.dmg">Download</a>
+                    <a href="#release-notes">Release Notes</a>
+                    <a href="opensource.html">Open Source</a>
+                </div>
+                <div class="footer-links">
+                    <h5>Developer</h5>
+                    <a href="https://github.com/kaanuluer/whispr" target="_blank">GitHub Repo</a>
+                    <a href="opensource.html#license">MIT License</a>
+                </div>
+                <div class="footer-links">
+                    <h5>Support</h5>
+                    <a href="mailto:support@kaanuluer.com">Email Support</a>
+                    <a href="#user-guide">User Guide</a>
+                </div>
+            </div>
+            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--surface); text-align: center;">
+                <p>&copy; 2026 Whispr. Built with quiet care by Kaan Uluer.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
