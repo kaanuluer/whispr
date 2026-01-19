@@ -34,9 +34,40 @@ class LLMService: ObservableObject {
     @Published var availableModels: [AIModel] = []
     @Published var capabilityMapping: [AICapability: String] = [:]
     @Published var isOllamaConnected: Bool = true
+    @Published var isPolling: Bool = false
+    
+    private var pollingTask: Task<Void, Never>?
     
     private init() {
         loadCapabilityMapping()
+        startOllamaPolling()
+    }
+    
+    func startOllamaPolling() {
+        guard !isPolling else { return }
+        isPolling = true
+        
+        pollingTask?.cancel()
+        pollingTask = Task {
+            while isPolling {
+                await detectLocalModels()
+                
+                if isOllamaConnected && !availableModels.isEmpty {
+                    await MainActor.run {
+                        self.isPolling = false
+                    }
+                    break
+                }
+                
+                try? await Task.sleep(nanoseconds: 5 * 1_000_000_000)
+            }
+        }
+    }
+    
+    func stopPolling() {
+        isPolling = false
+        pollingTask?.cancel()
+        pollingTask = nil
     }
     
     private func loadCapabilityMapping() {

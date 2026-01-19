@@ -197,20 +197,50 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    if !llm.isOllamaConnected {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.red)
-                            Text("Ollama is not reachable. Ensure it's running on port 11434.")
+                    if llm.isPolling {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Searching for Ollama...")
                                 .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                    } else if !llm.isOllamaConnected {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                Text("Ollama is not reachable.")
+                                    .font(.system(size: 11, weight: .semibold))
+                            }
+                            
+                            Button(action: { 
+                                llm.loadModel()
+                                llm.startOllamaPolling()
+                            }) {
+                                Label("Retry Connection", systemImage: "arrow.clockwise")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
                         }
                         .padding(.vertical, 4)
                     }
                     
                     if !llm.availableModels.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Detected Models")
-                                .font(.headline)
+                            HStack {
+                                Text("Detected Models")
+                                    .font(.headline)
+                                Spacer()
+                                Button(action: { llm.loadModel() }) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 12))
+                                }
+                                .buttonStyle(.plain)
+                                .help("Refresh models")
+                            }
+                            
                             ForEach(llm.availableModels) { model in
                                 HStack {
                                     VStack(alignment: .leading) {
@@ -229,10 +259,22 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.vertical, 8)
-                    } else {
-                        Button("Detect Local Models") {
-                            llm.loadModel()
+                    } else if !llm.isPolling {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("No models detected.")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                            
+                            Button(action: { 
+                                llm.loadModel()
+                                llm.startOllamaPolling()
+                            }) {
+                                Label("Scan for Ollama", systemImage: "magnifyingglass")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
                         }
+                        .padding(.vertical, 4)
                     }
                 } header: {
                     Text("Local AI Infrastructure")
