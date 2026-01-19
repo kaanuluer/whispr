@@ -305,7 +305,7 @@ struct SettingsView: View {
                 }
                 
                 VStack(alignment: .center, spacing: 4) {
-                    Text("Whispr v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5")")
+                    Text("Whispr v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.1")")
                         .font(.system(size: 10, weight: .semibold))
                     Text("Made with quiet care.")
                         .font(.system(size: 9))
