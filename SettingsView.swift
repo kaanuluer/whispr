@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 struct SettingsView: View {
     @AppStorage("startAtLogin") private var startAtLogin = true
@@ -27,6 +28,9 @@ struct SettingsView: View {
                         }
                     }
                     .padding(.vertical, 4)
+                    .onChange(of: startAtLogin) { newValue in
+                        updateLaunchAtLogin(newValue)
+                    }
                     
                     Toggle(isOn: $pauseWhispr) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -201,6 +205,26 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 480, height: 420)
+        .onAppear {
+            // Synchronize with actual system status
+            startAtLogin = SMAppService.mainApp.status == .enabled
+        }
+    }
+    
+    private func updateLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled {
+                if SMAppService.mainApp.status != .enabled {
+                    try SMAppService.mainApp.register()
+                }
+            } else {
+                if SMAppService.mainApp.status == .enabled {
+                    try SMAppService.mainApp.unregister()
+                }
+            }
+        } catch {
+            print("Failed to update launch at login status: \(error)")
+        }
     }
 }
 

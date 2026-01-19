@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct MenuView: View {
     @State private var searchText = ""
@@ -62,6 +63,18 @@ struct MenuView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(.leading, 8)
+                    .help("Settings")
+
+                    Button(action: {
+                        NSApplication.shared.terminate(nil)
+                    }) {
+                        Image(systemName: "power")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 8)
+                    .help("Quit Whispr")
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)

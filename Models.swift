@@ -24,6 +24,7 @@ struct ClipboardItem: Identifiable, Hashable {
     let content: String
     let type: ClipboardContentType
     let timestamp: Date
+    let sourceApp: String? // Name of the app the content was copied from
     var isPinned: Bool = false
     var aiResult: String? = nil
     var isProcessingAI: Bool = false

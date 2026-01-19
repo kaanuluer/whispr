@@ -43,9 +43,19 @@ struct ClipboardRow: View {
                     }
                     
                     // Metadata
-                    HStack {
+                    HStack(spacing: 4) {
+                        if let source = item.sourceApp {
+                            Text(source)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(WhisprStyle.accentColor.opacity(0.8))
+                            
+                            Text("•")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary.opacity(0.5))
+                        }
+                        
                         Text(item.timestamp.relativeDescription())
-                            .font(.system(size: 11))
+                            .font(.system(size: 10))
                             .foregroundColor(.secondary)
                         
                         if item.isPinned {

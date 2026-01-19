@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ServiceManagement
 
 @main
 struct WhisprApp: App {
@@ -20,6 +21,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Start model loading
         LLMService.shared.loadModel()
+        
+        // Handle Start at Login
+        let startAtLogin = UserDefaults.standard.object(forKey: "startAtLogin") as? Bool ?? true
+        if startAtLogin {
+            if SMAppService.mainApp.status != .enabled {
+                try? SMAppService.mainApp.register()
+            }
+        }
         
         // Create the popover
         popover.contentSize = NSSize(width: 320, height: 500)
