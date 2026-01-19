@@ -27,6 +27,7 @@ struct ClipboardItem: Identifiable, Hashable {
     let sourceApp: String? // Name of the app the content was copied from
     var isPinned: Bool = false
     var aiResult: String? = nil
+    var advancedAIResult: AIProcessingResult? = nil
     var isProcessingAI: Bool = false
 }
 
@@ -95,4 +96,43 @@ struct CreditCardUtils {
         }
         return false
     }
+}
+
+// MARK: - Advanced AI Models
+
+enum AICapability: String, CaseIterable, Codable {
+    case classification = "classification"
+    case suggestion = "suggestion"
+    case ranking = "ranking"
+    case grouping = "grouping"
+    case rewrite = "rewrite"
+    case clean = "clean"
+    case summarize = "summarize"
+    case translate = "translate"
+    
+    var displayName: String {
+        self.rawValue.capitalized
+    }
+}
+
+struct AIModel: Identifiable, Codable, Hashable {
+    var id: String { name }
+    let name: String
+    let type: String // chat, code, general
+    let capabilities: [AICapability]
+    let maxTokens: Int
+}
+
+struct AIProcessingResult: Codable, Hashable {
+    let modelsDetected: [AIModel]
+    let capabilityMapping: [String: String]
+    let modelsUsed: [String: String]
+    let classification: [String: String]
+    let riskLevel: String // low, medium, high
+    let intentGuess: String
+    let suggestions: [String]
+    let grouping: [String]
+    let rewriteAllowed: Bool
+    let featureSkipped: Bool
+    let noModelAvailable: Bool
 }

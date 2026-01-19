@@ -2,11 +2,13 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
+    @ObservedObject var llm = LLMService.shared
     @AppStorage("startAtLogin") private var startAtLogin = true
     @AppStorage("pauseWhispr") private var pauseWhispr = false
     @AppStorage("historySize") private var historySize = 50
     @AppStorage("enableAI") private var enableAI = true
     @AppStorage("maxOutputLength") private var maxOutputLength = 200
+    @AppStorage("targetLanguage") private var targetLanguage = "English"
     
     // Individual AI Action States
     @AppStorage("showCleanAction") private var showCleanAction = true
@@ -94,7 +96,7 @@ struct SettingsView: View {
                 
                 Section {
                     Button(role: .destructive) {
-                        // Action to clear history
+                        ClipboardManager.shared.clearAllHistory()
                     } label: {
                         HStack {
                             Spacer()
@@ -126,6 +128,27 @@ struct SettingsView: View {
                 
                 if enableAI {
                     Section {
+                        ForEach(AICapability.allCases, id: \.self) { capability in
+                            Picker(capability.displayName, selection: Binding(
+                                get: { llm.capabilityMapping[capability] ?? "None" },
+                                set: { newValue in
+                                    llm.capabilityMapping[capability] = newValue
+                                    llm.saveCapabilityMapping()
+                                }
+                            )) {
+                                Text("None").tag("None")
+                                ForEach(llm.availableModels.filter { $0.capabilities.contains(capability) }) { model in
+                                    Text(model.name).tag(model.name)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Capability Model Mapping")
+                    } footer: {
+                        Text("Assign local models to specific AI tasks.")
+                    }
+                    
+                    Section {
                         Toggle(isOn: $showCleanAction) {
                             Label("Clean", systemImage: "wand.and.stars")
                         }
@@ -143,6 +166,14 @@ struct SettingsView: View {
                     }
                     
                     Section {
+                        Picker("Target language", selection: $targetLanguage) {
+                            Text("English").tag("English")
+                            Text("Turkish").tag("Turkish")
+                            Text("German").tag("German")
+                            Text("French").tag("French")
+                            Text("Spanish").tag("Spanish")
+                        }
+                        
                         Picker("Max output length", selection: $maxOutputLength) {
                             Text("Short (100)").tag(100)
                             Text("Medium (200)").tag(200)
@@ -163,6 +194,48 @@ struct SettingsView: View {
                     ShortcutRow(label: "Open Whispr", shortcut: "⌥ ␣")
                 } header: {
                     Text("Global Shortcuts")
+                }
+                
+                Section {
+                    if !llm.isOllamaConnected {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.red)
+                            Text("Ollama is not reachable. Ensure it's running on port 11434.")
+                                .font(.system(size: 11))
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    
+                    if !llm.availableModels.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Detected Models")
+                                .font(.headline)
+                            ForEach(llm.availableModels) { model in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(model.name)
+                                            .font(.system(size: 12, weight: .medium))
+                                        Text(model.type.capitalized)
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Text("\(model.maxTokens) tokens")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    } else {
+                        Button("Detect Local Models") {
+                            llm.loadModel()
+                        }
+                    }
+                } header: {
+                    Text("Local AI Infrastructure")
                 }
                 
                 Section {
@@ -190,7 +263,7 @@ struct SettingsView: View {
                 }
                 
                 VStack(alignment: .center, spacing: 4) {
-                    Text("Whispr v1.0.0")
+                    Text("Whispr v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1")")
                         .font(.system(size: 10, weight: .semibold))
                     Text("Made with quiet care.")
                         .font(.system(size: 9))

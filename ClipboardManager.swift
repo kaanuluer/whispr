@@ -86,6 +86,27 @@ class ClipboardManager: ObservableObject {
             if self.items.count > 100 {
                 self.items.removeLast()
             }
+            
+            // Trigger Advanced AI Processing
+            self.processItemAI(newItem.id)
+        }
+    }
+    
+    private func processItemAI(_ id: UUID) {
+        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        let item = items[index]
+        
+        items[index].isProcessingAI = true
+        
+        Task {
+            let result = await LLMService.shared.processAdvanced(item)
+            
+            await MainActor.run {
+                if let currentIndex = self.items.firstIndex(where: { $0.id == id }) {
+                    self.items[currentIndex].advancedAIResult = result
+                    self.items[currentIndex].isProcessingAI = false
+                }
+            }
         }
     }
     
@@ -145,5 +166,15 @@ class ClipboardManager: ObservableObject {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index].aiResult = nil
         }
+    }
+    
+    func removeItem(_ item: ClipboardItem) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items.remove(at: index)
+        }
+    }
+    
+    func clearAllHistory() {
+        items.removeAll()
     }
 }

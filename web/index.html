@@ -392,8 +392,23 @@
             </div>
             <div class="feature-card">
                 <span class="icon">🤖</span>
-                <h3>Local AI Intelligence</h3>
-                <p>Powerful local LLM capabilities integrated directly. Clean, summarize, and rewrite your clipboard content without any data leaving your device.</p>
+                <h3>Local AI Intelligence (Ollama)</h3>
+                <p>Integrates with your local Ollama instance for 100% offline AI processing. No APIs, no keys, no subscription. Whispr detects your installed models and uses them to process your clipboard.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">✨</span>
+                <h3>One-Click Refinement</h3>
+                <p>Instantly clean grammar, summarize long texts, rewrite content, or fix code snippets directly from the menu. Each task can be assigned to a specific local model (like Llama 3 or Mistral).</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🌐</span>
+                <h3>Privacy-First Translation</h3>
+                <p>Translate clipboard content into English, Turkish, German, French, or Spanish using your local LLM. Professional-grade translation without sending a single byte to the cloud.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🛡️</span>
+                <h3>Zero-Leak Guarantee</h3>
+                <p>By using Ollama locally, your most sensitive data—including passwords and private notes—never leaves your Mac. Whispr keeps your AI workflow entirely on-device.</p>
             </div>
         </section>
 
@@ -440,6 +455,18 @@
         <section id="release-notes" class="content-block">
             <h2>Release Notes</h2>
             <div class="release-log">
+                <span class="version-tag">v1.0.1 — AI Integration</span>
+                <span class="release-date">January 19, 2026</span>
+                <ul class="release-list">
+                    <li><strong>Ollama Integration:</strong> Full support for local LLMs via Ollama API.</li>
+                    <li><strong>Dynamic Model Detection:</strong> Automatically fetches and lists your installed Ollama models.</li>
+                    <li><strong>Capability Mapping:</strong> Assign specific models to Clean, Summarize, Rewrite, and Translate tasks.</li>
+                    <li><strong>Local Translation:</strong> Private translation between 5 languages (EN, TR, DE, FR, ES).</li>
+                    <li><strong>Launch at Login:</strong> New setting to start Whispr automatically on system startup.</li>
+                    <li><strong>Quit Button:</strong> Added a quick exit option to the menu bar interface.</li>
+                    <li><strong>Bug Fixes:</strong> Resolved issues with translation prompts and model detection.</li>
+                </ul>
+
                 <span class="version-tag">v1.0.0 — The Beginning</span>
                 <span class="release-date">January 18, 2026</span>
                 <ul class="release-list">
@@ -447,8 +474,6 @@
                     <li>Privacy-first local storage (No cloud, no sync).</li>
                     <li>Automatic credit card detection and secure masking.</li>
                     <li>Smart Pinning system (Max 3 items).</li>
-                    <li>Integrated Local AI (Clean, Summarize, Rewrite).</li>
-                    <li>Customizable "Active Actions" interface.</li>
                     <li>Native macOS Sonoma & Sequoia support.</li>
                 </ul>
             </div>

@@ -63,21 +63,55 @@ struct ClipboardRow: View {
                                 .font(.system(size: 10))
                                 .foregroundColor(WhisprStyle.accentColor)
                         }
+                        
+                        if let ai = item.advancedAIResult {
+                            if ai.riskLevel == "high" {
+                                Text("SENSITIVE")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 1)
+                                    .background(Color.red)
+                                    .cornerRadius(2)
+                            }
+                            
+                            if !ai.intentGuess.isEmpty {
+                                Text(ai.intentGuess)
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            }
+                        }
                     }
                 }
                 
                 Spacer()
                 
-                // Pin Button
+                // Action Buttons
                 if isHovered {
-                    Button(action: {
-                        ClipboardManager.shared.togglePin(for: item)
-                    }) {
-                        Image(systemName: item.isPinned ? "pin.fill" : "pin")
-                            .font(.system(size: 12))
-                            .foregroundColor(item.isPinned ? WhisprStyle.accentColor : .secondary)
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            ClipboardManager.shared.togglePin(for: item)
+                        }) {
+                            Image(systemName: item.isPinned ? "pin.fill" : "pin")
+                                .font(.system(size: 12))
+                                .foregroundColor(item.isPinned ? WhisprStyle.accentColor : .secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .help(item.isPinned ? "Unpin" : "Pin")
+
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                ClipboardManager.shared.removeItem(item)
+                            }
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.secondary.opacity(0.6))
+                        }
+                        .buttonStyle(.plain)
+                        .help("Remove from history")
                     }
-                    .buttonStyle(.plain)
                     .padding(.trailing, 4)
                 }
                 
