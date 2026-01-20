@@ -22,6 +22,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Start model loading
         LLMService.shared.loadModel()
         
+        // Initialize Shortcut Manager
+        _ = ShortcutManager.shared
+        
+        // Listen for global shortcut
+        NotificationCenter.default.addObserver(self, selector: #selector(togglePopover(_:)), name: .toggleWhisprPopover, object: nil)
+        
         // Handle Start at Login
         let startAtLogin = UserDefaults.standard.object(forKey: "startAtLogin") as? Bool ?? true
         if startAtLogin {
@@ -51,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 popover.performClose(sender)
             } else {
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                NSApp.activate(ignoringOtherApps: true)
             }
         }
     }

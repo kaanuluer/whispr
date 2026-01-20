@@ -191,7 +191,11 @@ struct SettingsView: View {
             // Shortcuts & Support
             Form {
                 Section {
-                    ShortcutRow(label: "Open Whispr", shortcut: "⌥ ␣")
+                    HStack {
+                        Text("Open Whispr")
+                        Spacer()
+                        ShortcutRecorder()
+                    }
                 } header: {
                     Text("Global Shortcuts")
                 }

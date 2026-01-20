@@ -14,6 +14,8 @@
 		EF0EB3112F1D3D030068F6A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB30B2F1D3D030068F6A3 /* SettingsView.swift */; };
 		EF0EB3122F1D3D030068F6A3 /* ClipboardRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3072F1D3D030068F6A3 /* ClipboardRow.swift */; };
 		EF0EB3132F1D3D030068F6A3 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3092F1D3D030068F6A3 /* MenuView.swift */; };
+		EF0EB3172F1D3D030068F6A3 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */; };
+		EF0EB3182F1D3D030068F6A3 /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +27,8 @@
 		EF0EB30A2F1D3D030068F6A3 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Models.swift; path = ../Models.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB30B2F1D3D030068F6A3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = ../SettingsView.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB30C2F1D3D030068F6A3 /* WhisprApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WhisprApp.swift; path = ../WhisprApp.swift; sourceTree = SOURCE_ROOT; };
+		EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutManager.swift; path = ../ShortcutManager.swift; sourceTree = SOURCE_ROOT; };
+		EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutRecorder.swift; path = ../ShortcutRecorder.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Whispr-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,6 +63,8 @@
 				EF0EB30A2F1D3D030068F6A3 /* Models.swift */,
 				EF0EB30B2F1D3D030068F6A3 /* SettingsView.swift */,
 				EF0EB30C2F1D3D030068F6A3 /* WhisprApp.swift */,
+				EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */,
+				EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */,
 				EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
@@ -153,6 +159,8 @@
 				EF0EB3112F1D3D030068F6A3 /* SettingsView.swift in Sources */,
 				EF0EB3122F1D3D030068F6A3 /* ClipboardRow.swift in Sources */,
 				EF0EB3132F1D3D030068F6A3 /* MenuView.swift in Sources */,
+				EF0EB3172F1D3D030068F6A3 /* ShortcutManager.swift in Sources */,
+				EF0EB3182F1D3D030068F6A3 /* ShortcutRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,7 +296,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 2GCV66YKTM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -314,7 +322,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -338,7 +346,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 2GCV66YKTM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -364,7 +372,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
