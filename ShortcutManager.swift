@@ -1,6 +1,7 @@
 import Foundation
 import Cocoa
 import Carbon
+import Combine
 
 class ShortcutManager: ObservableObject {
     static let shared = ShortcutManager()
