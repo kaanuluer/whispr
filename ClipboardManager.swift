@@ -17,12 +17,28 @@ class ClipboardManager: ObservableObject {
         .init("PASTEBOARD_TYPE_CONCEALED")           // Generic concealed
     ]
     
+    private let storageKey = "whisprHistory"
+    
     private init() {
-        // Add some welcome items
-        addItem(content: "Welcome to Whispr! Copy any text to see it here.", type: .text, sourceApp: "Whispr")
-        addItem(content: "Hover over items to see local AI actions like Clean or Summarize.", type: .text, sourceApp: "Whispr")
-        
+        loadHistory()
         startMonitoring()
+    }
+    
+    private func loadHistory() {
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let decoded = try? JSONDecoder().decode([ClipboardItem].self, from: data) {
+            self.items = decoded
+        } else {
+            // Default welcome items if no history exists
+            addItem(content: "Welcome to Whispr! Copy any text to see it here.", type: .text, sourceApp: "Whispr")
+            addItem(content: "Hover over items to see local AI actions like Clean or Summarize.", type: .text, sourceApp: "Whispr")
+        }
+    }
+    
+    private func saveHistory() {
+        if let encoded = try? JSONEncoder().encode(items) {
+            UserDefaults.standard.set(encoded, forKey: storageKey)
+        }
     }
     
     func startMonitoring() {
@@ -83,9 +99,14 @@ class ClipboardManager: ObservableObject {
             }
             
             // 4. Limit history size
-            if self.items.count > 100 {
-                self.items.removeLast()
+            let historySize = UserDefaults.standard.integer(forKey: "historySize")
+            let maxItems = historySize > 0 ? historySize : 50 // Default to 50 if not set
+            
+            if self.items.count > maxItems {
+                self.items.removeLast(self.items.count - maxItems)
             }
+            
+            self.saveHistory()
             
             // Trigger Advanced AI Processing
             self.processItemAI(newItem.id)
@@ -105,6 +126,7 @@ class ClipboardManager: ObservableObject {
                 if let currentIndex = self.items.firstIndex(where: { $0.id == id }) {
                     self.items[currentIndex].advancedAIResult = result
                     self.items[currentIndex].isProcessingAI = false
+                    self.saveHistory()
                 }
             }
         }
@@ -122,6 +144,7 @@ class ClipboardManager: ObservableObject {
                     if let newIndex = self.items.firstIndex(where: { $0.id == item.id }) {
                         self.items[newIndex].aiResult = result
                         self.items[newIndex].isProcessingAI = false
+                        self.saveHistory()
                     }
                 }
             } catch {
@@ -160,21 +183,25 @@ class ClipboardManager: ObservableObject {
             }
             return a.timestamp > b.timestamp
         }
+        saveHistory()
     }
     
     func clearAIResult(for item: ClipboardItem) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index].aiResult = nil
+            saveHistory()
         }
     }
     
     func removeItem(_ item: ClipboardItem) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items.remove(at: index)
+            saveHistory()
         }
     }
     
     func clearAllHistory() {
         items.removeAll()
+        saveHistory()
     }
 }

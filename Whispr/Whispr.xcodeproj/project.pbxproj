@@ -27,9 +27,9 @@
 		EF0EB30A2F1D3D030068F6A3 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Models.swift; path = ../Models.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB30B2F1D3D030068F6A3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = ../SettingsView.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB30C2F1D3D030068F6A3 /* WhisprApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WhisprApp.swift; path = ../WhisprApp.swift; sourceTree = SOURCE_ROOT; };
+		EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Whispr-Bridging-Header.h"; sourceTree = "<group>"; };
 		EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutManager.swift; path = ../ShortcutManager.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutRecorder.swift; path = ../ShortcutRecorder.swift; sourceTree = SOURCE_ROOT; };
-		EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Whispr-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -322,7 +322,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -372,7 +372,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

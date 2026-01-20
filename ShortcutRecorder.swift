@@ -91,7 +91,7 @@ struct ShortcutRecorderHandler: NSViewRepresentable {
         
         private func mapToCarbonModifiers(_ modifiers: NSEvent.ModifierFlags) -> UInt32 {
             var carbonModifiers: UInt32 = 0
-            if modifiers.contains(.command) { carbonModifiers |= UInt32(commandKey) }
+            if modifiers.contains(.command) { carbonModifiers |= UInt32(cmdKey) }
             if modifiers.contains(.option) { carbonModifiers |= UInt32(optionKey) }
             if modifiers.contains(.control) { carbonModifiers |= UInt32(controlKey) }
             if modifiers.contains(.shift) { carbonModifiers |= UInt32(shiftKey) }

@@ -51,7 +51,7 @@ class ShortcutManager: ObservableObject {
         if eventHandler == nil {
             var eventSpec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
             
-            InstallApplicationEventHandler({ (nextHandler, event, userData) -> OSStatus in
+            InstallEventHandler(GetApplicationEventTarget(), { (nextHandler, event, userData) -> OSStatus in
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(name: .toggleWhisprPopover, object: nil)
                 }
@@ -76,7 +76,7 @@ class ShortcutManager: ObservableObject {
         if modifiers & UInt32(controlKey) != 0 { text += "⌃ " }
         if modifiers & UInt32(optionKey) != 0 { text += "⌥ " }
         if modifiers & UInt32(shiftKey) != 0 { text += "⇧ " }
-        if modifiers & UInt32(commandKey) != 0 { text += "⌘ " }
+        if modifiers & UInt32(cmdKey) != 0 { text += "⌘ " }
         
         text += keyName(for: keyCode)
         self.shortcutText = text

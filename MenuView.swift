@@ -121,7 +121,10 @@ struct MenuView: View {
             ScrollView {
                 VStack(spacing: 2) {
                     let filteredItems = clipboard.items.filter { 
-                        searchText.isEmpty ? true : $0.content.localizedCaseInsensitiveContains(searchText) 
+                        if searchText.isEmpty { return true }
+                        let contentMatch = $0.content.localizedCaseInsensitiveContains(searchText)
+                        let appMatch = $0.sourceApp?.localizedCaseInsensitiveContains(searchText) ?? false
+                        return contentMatch || appMatch
                     }
                     
                     if filteredItems.isEmpty {

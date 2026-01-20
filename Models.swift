@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-enum ClipboardContentType: String, CaseIterable {
+enum ClipboardContentType: String, CaseIterable, Codable {
     case text
     case link
     case code
@@ -19,8 +19,8 @@ enum ClipboardContentType: String, CaseIterable {
     }
 }
 
-struct ClipboardItem: Identifiable, Hashable {
-    let id = UUID()
+struct ClipboardItem: Identifiable, Hashable, Codable {
+    var id = UUID()
     let content: String
     let type: ClipboardContentType
     let timestamp: Date
