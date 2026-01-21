@@ -18,10 +18,52 @@ class ClipboardManager: ObservableObject {
     ]
     
     private let storageKey = "whisprHistory"
+    private var desktopMonitor: DispatchSourceFileSystemObject?
+    private var downloadsMonitor: DispatchSourceFileSystemObject?
+    private var customMonitor: DispatchSourceFileSystemObject?
+    private let fileManager = FileManager.default
     
     private init() {
         loadHistory()
         startMonitoring()
+        refreshMonitors()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshMonitors), name: .screenshotFolderChanged, object: nil)
+    }
+    
+    @objc private func refreshMonitors() {
+        stopMonitors()
+        
+        let customPath = UserDefaults.standard.string(forKey: "screenshotFolderPath") ?? ""
+        
+        if !customPath.isEmpty {
+            startCustomMonitoring(path: customPath)
+        } else {
+            startDesktopMonitoring()
+            startDownloadsMonitoring()
+        }
+    }
+    
+    private func stopMonitors() {
+        desktopMonitor?.cancel()
+        downloadsMonitor?.cancel()
+        customMonitor?.cancel()
+        desktopMonitor = nil
+        downloadsMonitor = nil
+        customMonitor = nil
+    }
+    
+    private func startCustomMonitoring(path: String) {
+        let url = URL(fileURLWithPath: path)
+        let descriptor = open(url.path, O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        
+        customMonitor = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: .main)
+        customMonitor?.setEventHandler { [weak self] in
+            self?.checkNewScreenshots(at: url, groupName: "Screenshots (Custom)")
+        }
+        customMonitor?.setCancelHandler { close(descriptor) }
+        customMonitor?.resume()
     }
     
     private func loadHistory() {
@@ -41,6 +83,91 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    private func startDesktopMonitoring() {
+        let desktopPath = NSSearchPathForDirectoriesInDomains(.desktopDirectory, .userDomainMask, true).first!
+        let desktopURL = URL(fileURLWithPath: desktopPath)
+        
+        let descriptor = open(desktopURL.path, O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        
+        desktopMonitor = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: .main)
+        
+        desktopMonitor?.setEventHandler { [weak self] in
+            self?.checkNewScreenshots(at: desktopURL, groupName: "Screenshots (Desktop)")
+        }
+        
+        desktopMonitor?.setCancelHandler {
+            close(descriptor)
+        }
+        
+        desktopMonitor?.resume()
+    }
+    
+    private func startDownloadsMonitoring() {
+        let downloadsPath = NSSearchPathForDirectoriesInDomains(.downloadsDirectory, .userDomainMask, true).first!
+        let downloadsURL = URL(fileURLWithPath: downloadsPath)
+        
+        let descriptor = open(downloadsURL.path, O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        
+        downloadsMonitor = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: .main)
+        
+        downloadsMonitor?.setEventHandler { [weak self] in
+            self?.checkNewScreenshots(at: downloadsURL, groupName: "Screenshots (Downloads)")
+        }
+        
+        downloadsMonitor?.setCancelHandler {
+            close(descriptor)
+        }
+        
+        downloadsMonitor?.resume()
+    }
+    
+    private func checkNewScreenshots(at url: URL, groupName: String) {
+        // Give macOS a moment to finish writing the file
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            do {
+                let files = try self.fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)
+                
+                let now = Date()
+                let screenshots = files.filter { file in
+                    let name = file.lastPathComponent
+                    
+                    let patterns = [
+                        "Screenshot", "Screen Shot", "Ekran", "Captura", "Capture", 
+                        "Bildschirmfoto", "Снимок", "Skjermbilde", "Zrzut", "Screen"
+                    ]
+                    
+                    let isScreenshot = patterns.contains { name.localizedCaseInsensitiveContains($0) }
+                    let isImage = ["png", "jpg", "jpeg", "tiff", "heic"].contains(file.pathExtension.lowercased())
+                    
+                    guard isScreenshot && isImage else { return false }
+                    
+                    let values = try? file.resourceValues(forKeys: [.creationDateKey])
+                    if let date = values?.creationDate {
+                        return now.timeIntervalSince(date) < 15 // Increased window to 15s
+                    }
+                    return false
+                }
+                
+                for screenshot in screenshots {
+                    let alreadyAdded = self.items.contains { item in
+                        item.type == .image && item.content == screenshot.lastPathComponent
+                    }
+                    
+                    if !alreadyAdded {
+                        if let data = try? Data(contentsOf: screenshot) {
+                            self.addItem(content: screenshot.lastPathComponent, type: .image, sourceApp: groupName, imageData: data, filePath: screenshot.path)
+                        }
+                    }
+                }
+            } catch {
+                print("Error monitoring folder \(url.path): \(error)")
+            }
+        }
+    }
+    
     func startMonitoring() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.checkClipboard()
@@ -57,6 +184,13 @@ class ClipboardManager: ObservableObject {
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
         
+        // Handle Images
+        if let imageData = pasteboard.data(forType: .tiff) ?? pasteboard.data(forType: .png) {
+            let sourceApp = NSWorkspace.shared.frontmostApplication?.localizedName
+            addItem(content: "Image Content", type: .image, sourceApp: sourceApp, imageData: imageData)
+            return
+        }
+        
         if let content = pasteboard.string(forType: .string) {
             // Get source application info
             let sourceApp = NSWorkspace.shared.frontmostApplication?.localizedName
@@ -69,13 +203,19 @@ class ClipboardManager: ObservableObject {
         }
     }
     
-    func addItem(content: String, type: ClipboardContentType, sourceApp: String? = nil) {
+    func addItem(content: String, type: ClipboardContentType, sourceApp: String? = nil, imageData: Data? = nil, filePath: String? = nil) {
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedContent.isEmpty else { return }
+        if type != .image && trimmedContent.isEmpty { return }
 
         DispatchQueue.main.async {
             var wasPinned = false
-            if let existingIndex = self.items.firstIndex(where: { $0.content == trimmedContent }) {
+            // For images, we compare the data if available, or just add it
+            if type == .image, let newData = imageData {
+                if let existingIndex = self.items.firstIndex(where: { $0.type == .image && ($0.imageData == newData || ($0.filePath != nil && $0.filePath == filePath)) }) {
+                    wasPinned = self.items[existingIndex].isPinned
+                    self.items.remove(at: existingIndex)
+                }
+            } else if let existingIndex = self.items.firstIndex(where: { $0.content == trimmedContent && $0.type != .image }) {
                 wasPinned = self.items[existingIndex].isPinned
                 self.items.remove(at: existingIndex)
             }
@@ -85,7 +225,9 @@ class ClipboardManager: ObservableObject {
                 type: type,
                 timestamp: Date(),
                 sourceApp: sourceApp,
-                isPinned: wasPinned
+                isPinned: wasPinned,
+                imageData: imageData,
+                filePath: filePath
             )
             
             self.items.insert(newItem, at: 0)
@@ -117,6 +259,11 @@ class ClipboardManager: ObservableObject {
         guard let index = items.firstIndex(where: { $0.id == id }) else { return }
         let item = items[index]
         
+        // Skip AI processing for screenshots/file-based images as they usually don't need text analysis immediately
+        if item.type == .image && item.filePath != nil {
+            return
+        }
+
         items[index].isProcessingAI = true
         
         Task {
@@ -158,6 +305,23 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    func copyToClipboard(_ item: ClipboardItem) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        
+        if item.type == .image, let data = item.imageData {
+            // Determine if it's TIFF or PNG
+            if let image = NSImage(data: data) {
+                if let tiffData = image.tiffRepresentation {
+                    pasteboard.setData(tiffData, forType: .tiff)
+                }
+            }
+        } else {
+            pasteboard.setString(item.content, forType: .string)
+        }
+    }
+    
+    // Kept for backward compatibility if needed, but updated to use the new method
     func copyToClipboard(_ text: String) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -199,7 +363,13 @@ class ClipboardManager: ObservableObject {
             saveHistory()
         }
     }
-    
+
+    func openFileLocation(for item: ClipboardItem) {
+        guard let path = item.filePath else { return }
+        let url = URL(fileURLWithPath: path)
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
     func clearAllHistory() {
         items.removeAll()
         saveHistory()

@@ -34,6 +34,21 @@ struct ClipboardRow: View {
                             Text(CreditCardUtils.maskCardNumber(item.content))
                                 .font(.system(size: 13, weight: .medium, design: .monospaced))
                                 .foregroundColor(.primary)
+                        } else if item.type == .image, let data = item.imageData, let nsImage = NSImage(data: data) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Image(nsImage: nsImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 200, maxHeight: 120)
+                                    .cornerRadius(4)
+                                    .shadow(radius: 1)
+                                
+                                if !item.content.isEmpty && item.content != "Image Content" {
+                                    Text(item.content)
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
                         } else {
                             Text(item.content)
                                 .font(.system(size: 13, weight: .regular))
@@ -122,47 +137,59 @@ struct ClipboardRow: View {
                 }
             }
             
-            // AI Actions - Visible on Hover or Selection
-            if isHovered && !item.isProcessingAI && enableAI {
-                HStack(spacing: 4) {
-                    if showCleanAction {
-                        ActionIcon(symbol: "wand.and.stars", label: "Clean") {
-                            ClipboardManager.shared.performAIAction(item, action: .clean)
+            // Image File Actions or AI Actions
+            if isHovered && !item.isProcessingAI {
+                if item.type == .image && item.filePath != nil {
+                    HStack(spacing: 4) {
+                        ActionIcon(symbol: "folder", label: "Open Location") {
+                            ClipboardManager.shared.openFileLocation(for: item)
                         }
+                        
+                        Spacer()
                     }
-                    if showSummarizeAction {
-                        ActionIcon(symbol: "text.alignleft", label: "Summ") {
-                            ClipboardManager.shared.performAIAction(item, action: .summarize)
+                    .padding(.top, 4)
+                    .transition(.opacity)
+                } else if enableAI {
+                    HStack(spacing: 4) {
+                        if showCleanAction {
+                            ActionIcon(symbol: "wand.and.stars", label: "Clean") {
+                                ClipboardManager.shared.performAIAction(item, action: .clean)
+                            }
                         }
-                    }
-                    if showRewriteAction {
-                        ActionIcon(symbol: "pencil", label: "Fix") {
-                            ClipboardManager.shared.performAIAction(item, action: .rewrite)
+                        if showSummarizeAction {
+                            ActionIcon(symbol: "text.alignleft", label: "Summ") {
+                                ClipboardManager.shared.performAIAction(item, action: .summarize)
+                            }
                         }
-                    }
-                    if showTranslateAction {
-                        ActionIcon(symbol: "character.book.closed", label: "Tr") {
-                            ClipboardManager.shared.performAIAction(item, action: .translate)
+                        if showRewriteAction {
+                            ActionIcon(symbol: "pencil", label: "Fix") {
+                                ClipboardManager.shared.performAIAction(item, action: .rewrite)
+                            }
                         }
+                        if showTranslateAction {
+                            ActionIcon(symbol: "character.book.closed", label: "Tr") {
+                                ClipboardManager.shared.performAIAction(item, action: .translate)
+                            }
+                        }
+                        
+                        Spacer(minLength: 4)
+                        
+                        Button(action: {
+                            ClipboardManager.shared.copyToClipboard(item)
+                        }) {
+                            Image(systemName: "doc.on.doc")
+                                .font(.system(size: 11))
+                                .foregroundColor(WhisprStyle.accentColor)
+                                .frame(width: 24, height: 24)
+                                .background(WhisprStyle.accentColor.opacity(0.1))
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .help("Copy original")
                     }
-                    
-                    Spacer(minLength: 4)
-                    
-                    Button(action: {
-                        ClipboardManager.shared.copyToClipboard(item.content)
-                    }) {
-                        Image(systemName: "doc.on.doc")
-                            .font(.system(size: 11))
-                            .foregroundColor(WhisprStyle.accentColor)
-                            .frame(width: 24, height: 24)
-                            .background(WhisprStyle.accentColor.opacity(0.1))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Copy original")
+                    .padding(.top, 4)
+                    .transition(.opacity)
                 }
-                .padding(.top, 4)
-                .transition(.opacity)
             }
             
             // AI Result Area
@@ -182,9 +209,9 @@ struct ClipboardRow: View {
         .contentShape(Rectangle()) // Make the whole row clickable
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.1)) {
-                // Visual feedback could be added here
+                // Visual feedback
             }
-            ClipboardManager.shared.copyToClipboard(item.content)
+            ClipboardManager.shared.copyToClipboard(item)
         }
         .onHover { hovering in
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {

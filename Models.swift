@@ -29,6 +29,8 @@ struct ClipboardItem: Identifiable, Hashable, Codable {
     var aiResult: String? = nil
     var advancedAIResult: AIProcessingResult? = nil
     var isProcessingAI: Bool = false
+    var imageData: Data? = nil // Binary data for images/screenshots
+    var filePath: String? = nil // Path to the file if it exists (e.g., screenshots)
 }
 
 // Design Tokens

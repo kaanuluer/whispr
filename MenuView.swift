@@ -119,7 +119,7 @@ struct MenuView: View {
             
             // 3. Clipboard List
             ScrollView {
-                VStack(spacing: 2) {
+                VStack(spacing: 12) {
                     let filteredItems = clipboard.items.filter { 
                         if searchText.isEmpty { return true }
                         let contentMatch = $0.content.localizedCaseInsensitiveContains(searchText)
@@ -133,8 +133,48 @@ struct MenuView: View {
                             .foregroundColor(.secondary)
                             .padding(.top, 40)
                     } else {
-                        ForEach(filteredItems) { item in
-                            ClipboardRow(item: item)
+                        // 1. Separate Pinned Items
+                        let pinnedItems = filteredItems.filter { $0.isPinned }
+                        let unpinnedItems = filteredItems.filter { !$0.isPinned }
+                        
+                        if !pinnedItems.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Image(systemName: "pin.fill")
+                                        .font(.system(size: 10))
+                                    Text("Pinned")
+                                        .font(.system(size: 10, weight: .bold))
+                                    Rectangle()
+                                        .fill(WhisprStyle.accentColor.opacity(0.2))
+                                        .frame(height: 1)
+                                }
+                                .foregroundColor(WhisprStyle.accentColor)
+                                .padding(.horizontal, 4)
+                                
+                                ForEach(pinnedItems) { item in
+                                    ClipboardRow(item: item)
+                                }
+                            }
+                            .padding(.bottom, 8)
+                        }
+                        
+                        // 2. Recent Items (Chronological List)
+                        if !unpinnedItems.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text("Recent")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.secondary)
+                                    Rectangle()
+                                        .fill(Color.primary.opacity(0.1))
+                                        .frame(height: 1)
+                                }
+                                .padding(.horizontal, 4)
+                                
+                                ForEach(unpinnedItems) { item in
+                                    ClipboardRow(item: item)
+                                }
+                            }
                         }
                     }
                 }

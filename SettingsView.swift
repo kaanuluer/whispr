@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage("enableAI") private var enableAI = true
     @AppStorage("maxOutputLength") private var maxOutputLength = 200
     @AppStorage("targetLanguage") private var targetLanguage = "English"
+    @AppStorage("screenshotFolderPath") private var screenshotFolderPath = ""
     
     // Individual AI Action States
     @AppStorage("showCleanAction") private var showCleanAction = true
@@ -68,6 +69,44 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                 } header: {
                     Text("Storage")
+                }
+                
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Screenshots Folder")
+                            .font(.system(size: 13, weight: .medium))
+                        
+                        HStack {
+                            Text(screenshotFolderPath.isEmpty ? "Default (Desktop & Downloads)" : screenshotFolderPath)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            
+                            Spacer()
+                            
+                            Button("Select Folder") {
+                                selectScreenshotFolder()
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            
+                            if !screenshotFolderPath.isEmpty {
+                                Button(action: { screenshotFolderPath = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        
+                        Text("Whispr will monitor this folder for new screenshots and use it for image actions.")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                } header: {
+                    Text("Screenshots & Images")
                 }
             }
             .tabItem {
@@ -345,6 +384,26 @@ struct SettingsView: View {
             print("Failed to update launch at login status: \(error)")
         }
     }
+    
+    private func selectScreenshotFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.message = "Select the folder where your screenshots are saved."
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                screenshotFolderPath = url.path
+                // Notify ClipboardManager to refresh monitors
+                NotificationCenter.default.post(name: .screenshotFolderChanged, object: nil)
+            }
+        }
+    }
+}
+
+extension Notification.Name {
+    static let screenshotFolderChanged = Notification.Name("screenshotFolderChanged")
 }
 
 struct InfoRow: View {
