@@ -369,6 +369,35 @@ class ClipboardManager: ObservableObject {
         let url = URL(fileURLWithPath: path)
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
+    
+    func addTag(_ tag: String, to item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+        let normalizedTag = tag.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedTag.isEmpty else { return }
+        
+        if !items[index].tags.contains(normalizedTag) {
+            items[index].tags.append(normalizedTag)
+            items[index].tags.sort()
+            saveHistory()
+            TagManager.shared.addTag(normalizedTag)
+        }
+    }
+    
+    func removeTag(_ tag: String, from item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[index].tags.removeAll { $0 == tag.lowercased() }
+        saveHistory()
+    }
+    
+    func renameTagInAllItems(oldTag: String, newTag: String) {
+        for index in items.indices {
+            if let tagIndex = items[index].tags.firstIndex(of: oldTag) {
+                items[index].tags[tagIndex] = newTag
+                items[index].tags.sort()
+            }
+        }
+        saveHistory()
+    }
 
     func clearAllHistory() {
         items.removeAll()

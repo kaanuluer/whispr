@@ -122,9 +122,11 @@ struct MenuView: View {
                 VStack(spacing: 12) {
                     let filteredItems = clipboard.items.filter { 
                         if searchText.isEmpty { return true }
+                        let searchLower = searchText.lowercased()
                         let contentMatch = $0.content.localizedCaseInsensitiveContains(searchText)
                         let appMatch = $0.sourceApp?.localizedCaseInsensitiveContains(searchText) ?? false
-                        return contentMatch || appMatch
+                        let tagMatch = $0.tags.contains { $0.localizedCaseInsensitiveContains(searchLower) }
+                        return contentMatch || appMatch || tagMatch
                     }
                     
                     if filteredItems.isEmpty {

@@ -16,6 +16,7 @@
 		EF0EB3132F1D3D030068F6A3 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3092F1D3D030068F6A3 /* MenuView.swift */; };
 		EF0EB3172F1D3D030068F6A3 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */; };
 		EF0EB3182F1D3D030068F6A3 /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */; };
+		EF0EB3192F1D3D030068F6A3 /* TagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0EB31A2F1D3D030068F6A3 /* TagManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Whispr-Bridging-Header.h"; sourceTree = "<group>"; };
 		EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutManager.swift; path = ../ShortcutManager.swift; sourceTree = SOURCE_ROOT; };
 		EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutRecorder.swift; path = ../ShortcutRecorder.swift; sourceTree = SOURCE_ROOT; };
+		EF0EB31A2F1D3D030068F6A3 /* TagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TagManager.swift; path = ../TagManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -65,6 +67,7 @@
 				EF0EB30C2F1D3D030068F6A3 /* WhisprApp.swift */,
 				EF0EB3152F1D3D030068F6A3 /* ShortcutManager.swift */,
 				EF0EB3162F1D3D030068F6A3 /* ShortcutRecorder.swift */,
+				EF0EB31A2F1D3D030068F6A3 /* TagManager.swift */,
 				EF0EB3142F1D3D080068F6A3 /* Whispr-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
@@ -161,6 +164,7 @@
 				EF0EB3132F1D3D030068F6A3 /* MenuView.swift in Sources */,
 				EF0EB3172F1D3D030068F6A3 /* ShortcutManager.swift in Sources */,
 				EF0EB3182F1D3D030068F6A3 /* ShortcutRecorder.swift in Sources */,
+				EF0EB3192F1D3D030068F6A3 /* TagManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +326,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -372,7 +376,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.uluer.Whispr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

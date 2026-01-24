@@ -3,6 +3,9 @@ import SwiftUI
 struct ClipboardRow: View {
     let item: ClipboardItem
     @State private var isHovered = false
+    @State private var showTagInput = false
+    @State private var newTagText = ""
+    @ObservedObject var tagManager = TagManager.shared
     @AppStorage("enableAI") private var enableAI = true
     
     @AppStorage("showCleanAction") private var showCleanAction = true
@@ -98,6 +101,18 @@ struct ClipboardRow: View {
                             }
                         }
                     }
+                    
+                    // Tags Display
+                    if !item.tags.isEmpty {
+                        HStack(spacing: 4) {
+                            ForEach(item.tags, id: \.self) { tag in
+                                TagBadge(tag: tag, onRemove: {
+                                    ClipboardManager.shared.removeTag(tag, from: item)
+                                })
+                            }
+                        }
+                        .padding(.top, 2)
+                    }
                 }
                 
                 Spacer()
@@ -172,6 +187,10 @@ struct ClipboardRow: View {
                             }
                         }
                         
+                        ActionIcon(symbol: "tag", label: "Tag") {
+                            showTagInput.toggle()
+                        }
+                        
                         Spacer(minLength: 4)
                         
                         Button(action: {
@@ -190,6 +209,31 @@ struct ClipboardRow: View {
                     .padding(.top, 4)
                     .transition(.opacity)
                 }
+            }
+            
+            // Tag Input - Only show when hovered and tag button was clicked
+            if showTagInput && isHovered {
+                TagInputView(
+                    newTagText: $newTagText,
+                    availableTags: tagManager.allTags.filter { !item.tags.contains($0) },
+                    onAdd: { tag in
+                        ClipboardManager.shared.addTag(tag, to: item)
+                        newTagText = ""
+                        showTagInput = false
+                    },
+                    onCreateNew: {
+                        if !newTagText.isEmpty {
+                            ClipboardManager.shared.addTag(newTagText, to: item)
+                            newTagText = ""
+                            showTagInput = false
+                        }
+                    },
+                    onCancel: {
+                        showTagInput = false
+                        newTagText = ""
+                    }
+                )
+                .padding(.top, 4)
             }
             
             // AI Result Area
@@ -216,6 +260,10 @@ struct ClipboardRow: View {
         .onHover { hovering in
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 isHovered = hovering
+                if !hovering {
+                    showTagInput = false
+                    newTagText = ""
+                }
             }
         }
     }
@@ -294,6 +342,85 @@ struct AIResultView: View {
             .padding(8)
             .background(WhisprStyle.accentColor.opacity(0.05))
             .cornerRadius(6)
+        }
+    }
+}
+
+struct TagBadge: View {
+    let tag: String
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(tag)
+                .font(.system(size: 9, weight: .medium))
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 8))
+            }
+            .buttonStyle(.plain)
+        }
+        .foregroundColor(WhisprStyle.accentColor)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(WhisprStyle.accentColor.opacity(0.1))
+        .cornerRadius(8)
+    }
+}
+
+struct TagInputView: View {
+    @Binding var newTagText: String
+    let availableTags: [String]
+    let onAdd: (String) -> Void
+    let onCreateNew: () -> Void
+    let onCancel: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                TextField("Tag name", text: $newTagText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 11))
+                    .onSubmit {
+                        onCreateNew()
+                    }
+                
+                Button(action: onCreateNew) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(WhisprStyle.accentColor)
+                }
+                .buttonStyle(.plain)
+                .disabled(newTagText.isEmpty)
+                
+                Button(action: onCancel) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(6)
+            .background(Color.primary.opacity(0.05))
+            .cornerRadius(6)
+            
+            if !availableTags.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 4) {
+                        ForEach(availableTags, id: \.self) { tag in
+                            Button(action: { onAdd(tag) }) {
+                                Text(tag)
+                                    .font(.system(size: 9))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                                    .background(Color.primary.opacity(0.08))
+                                    .cornerRadius(4)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
         }
     }
 }

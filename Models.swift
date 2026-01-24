@@ -31,6 +31,7 @@ struct ClipboardItem: Identifiable, Hashable, Codable {
     var isProcessingAI: Bool = false
     var imageData: Data? = nil // Binary data for images/screenshots
     var filePath: String? = nil // Path to the file if it exists (e.g., screenshots)
+    var tags: [String] = [] // User-defined tags for organization
 }
 
 // Design Tokens
