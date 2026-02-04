@@ -4,6 +4,7 @@ import ServiceManagement
 struct SettingsView: View {
     @ObservedObject var llm = LLMService.shared
     @ObservedObject var tagManager = TagManager.shared
+    @ObservedObject var folderManager = FolderManager.shared
     @AppStorage("startAtLogin") private var startAtLogin = true
     @AppStorage("pauseWhispr") private var pauseWhispr = false
     @AppStorage("historySize") private var historySize = 50
@@ -12,6 +13,9 @@ struct SettingsView: View {
     @AppStorage("targetLanguage") private var targetLanguage = "English"
     @AppStorage("screenshotFolderPath") private var screenshotFolderPath = ""
     @State private var newTagName = ""
+    @State private var newFolderName = ""
+    @State private var editingFolderId: UUID? = nil
+    @State private var editingFolderName = ""
     
     // Individual AI Action States
     @AppStorage("showCleanAction") private var showCleanAction = true
@@ -25,6 +29,7 @@ struct SettingsView: View {
         case general = "General"
         case privacy = "Privacy"
         case tags = "Tags"
+        case folders = "Folders"
         case aiActions = "AI Actions"
         case support = "Support"
         
@@ -33,6 +38,7 @@ struct SettingsView: View {
             case .general: return "gearshape"
             case .privacy: return "hand.raised.fill"
             case .tags: return "tag.fill"
+            case .folders: return "folder.fill"
             case .aiActions: return "wand.and.stars.inverse"
             case .support: return "questionmark.circle.fill"
             }
@@ -86,6 +92,13 @@ struct SettingsView: View {
                         PrivacySettingsView()
                     case .tags:
                         TagsSettingsView(tagManager: tagManager, newTagName: $newTagName)
+                    case .folders:
+                        FoldersSettingsView(
+                            folderManager: folderManager,
+                            newFolderName: $newFolderName,
+                            editingFolderId: $editingFolderId,
+                            editingFolderName: $editingFolderName
+                        )
                     case .aiActions:
                         AIActionsSettingsView(
                             llm: llm,
@@ -350,6 +363,169 @@ struct TagsSettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+struct FoldersSettingsView: View {
+    @ObservedObject var folderManager: FolderManager
+    @Binding var newFolderName: String
+    @Binding var editingFolderId: UUID?
+    @Binding var editingFolderName: String
+    
+    var body: some View {
+        Form {
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        TextField("New folder name", text: $newFolderName)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 13))
+                            .onSubmit {
+                                if !newFolderName.isEmpty {
+                                    folderManager.createFolder(name: newFolderName)
+                                    newFolderName = ""
+                                }
+                            }
+                        
+                        Button(action: {
+                            if !newFolderName.isEmpty {
+                                folderManager.createFolder(name: newFolderName)
+                                newFolderName = ""
+                            }
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(WhisprStyle.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(newFolderName.isEmpty)
+                    }
+                    .padding(8)
+                    .background(Color.primary.opacity(0.05))
+                    .cornerRadius(6)
+                    
+                    if folderManager.folders.isEmpty {
+                        Text("No folders yet. Create your first folder above.")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
+                    } else {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(folderManager.folders) { folder in
+                                    FolderManagementRow(
+                                        folder: folder,
+                                        folderManager: folderManager,
+                                        editingFolderId: $editingFolderId,
+                                        editingFolderName: $editingFolderName
+                                    )
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 300)
+                    }
+                    
+                    Text("Folders store clipboard items separately from main history. Items in folders are encrypted and don't count towards your history limit.")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Text("Folders")
+            } footer: {
+                Text("Create folders to organize clipboard items. Right-click any item to add it to a folder. Folder contents are encrypted for security.")
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+struct FolderManagementRow: View {
+    let folder: ClipboardFolder
+    @ObservedObject var folderManager: FolderManager
+    @Binding var editingFolderId: UUID?
+    @Binding var editingFolderName: String
+    @State private var showDeleteAlert = false
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 14))
+                .foregroundColor(WhisprStyle.accentColor)
+            
+            if editingFolderId == folder.id {
+                TextField("Folder name", text: $editingFolderName)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12))
+                    .onSubmit {
+                        folderManager.renameFolder(folder.id, newName: editingFolderName)
+                        editingFolderId = nil
+                    }
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(folder.name)
+                        .font(.system(size: 12, weight: .medium))
+                    Text("\(folder.itemIds.count) items • Updated \(folder.updatedAt.relativeDescription())")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            if editingFolderId == folder.id {
+                Button(action: {
+                    folderManager.renameFolder(folder.id, newName: editingFolderName)
+                    editingFolderId = nil
+                }) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11))
+                        .foregroundColor(.green)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    editingFolderId = nil
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button(action: {
+                    editingFolderName = folder.name
+                    editingFolderId = folder.id
+                }) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Rename folder")
+                
+                Button(action: {
+                    showDeleteAlert = true
+                }) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 11))
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+                .help("Delete folder")
+                .alert("Delete Folder", isPresented: $showDeleteAlert) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Delete", role: .destructive) {
+                        folderManager.deleteFolder(folder.id)
+                    }
+                } message: {
+                    Text("Are you sure you want to delete '\(folder.name)'? All items in this folder will be permanently removed.")
+                }
+            }
+        }
+        .padding(8)
+        .background(Color.primary.opacity(0.03))
+        .cornerRadius(6)
     }
 }
 

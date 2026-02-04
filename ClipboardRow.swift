@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ClipboardRow: View {
     let item: ClipboardItem
@@ -6,6 +7,7 @@ struct ClipboardRow: View {
     @State private var showTagInput = false
     @State private var newTagText = ""
     @ObservedObject var tagManager = TagManager.shared
+    @ObservedObject var folderManager = FolderManager.shared
     @AppStorage("enableAI") private var enableAI = true
     
     @AppStorage("showCleanAction") private var showCleanAction = true
@@ -263,6 +265,91 @@ struct ClipboardRow: View {
                 if !hovering {
                     showTagInput = false
                     newTagText = ""
+                }
+            }
+        }
+        .contextMenu {
+            Button(action: {
+                ClipboardManager.shared.copyToClipboard(item)
+            }) {
+                Label("Copy", systemImage: "doc.on.doc")
+            }
+            
+            Divider()
+            
+            Menu("Add to Folder") {
+                if folderManager.folders.isEmpty {
+                    Text("No folders available")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(folderManager.folders) { folder in
+                        let isInFolder = folder.itemIds.contains(item.id)
+                        Button(action: {
+                            if isInFolder {
+                                folderManager.removeItemFromFolder(item.id, folderId: folder.id)
+                            } else {
+                                folderManager.addItemToFolder(item, folderId: folder.id)
+                            }
+                        }) {
+                            HStack {
+                                Label(folder.name, systemImage: isInFolder ? "checkmark.circle.fill" : "folder")
+                                if isInFolder {
+                                    Spacer()
+                                    Text("Added")
+                                        .font(.system(size: 9))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Divider()
+                
+                Button(action: {
+                    openFolderCreationDialog()
+                }) {
+                    Label("New Folder...", systemImage: "plus.folder")
+                }
+            }
+            
+            Divider()
+            
+            Button(action: {
+                ClipboardManager.shared.togglePin(for: item)
+            }) {
+                Label(item.isPinned ? "Unpin" : "Pin", systemImage: item.isPinned ? "pin.slash" : "pin")
+            }
+            
+            Button(role: .destructive, action: {
+                withAnimation(.spring()) {
+                    ClipboardManager.shared.removeItem(item)
+                }
+            }) {
+                Label("Remove", systemImage: "trash")
+            }
+        }
+    }
+    
+    private func openFolderCreationDialog() {
+        let alert = NSAlert()
+        alert.messageText = "New Folder"
+        alert.informativeText = "Enter a name for the new folder:"
+        alert.addButton(withTitle: "Create")
+        alert.addButton(withTitle: "Cancel")
+        
+        let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        input.placeholderString = "Folder name"
+        alert.accessoryView = input
+        
+        alert.window.initialFirstResponder = input
+        
+        if alert.runModal() == .alertFirstButtonReturn {
+            let folderName = input.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !folderName.isEmpty {
+                folderManager.createFolder(name: folderName)
+                if let newFolder = folderManager.folders.first(where: { $0.name == folderName }) {
+                    folderManager.addItemToFolder(item, folderId: newFolder.id)
                 }
             }
         }

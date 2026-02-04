@@ -139,3 +139,20 @@ struct AIProcessingResult: Codable, Hashable {
     let featureSkipped: Bool
     let noModelAvailable: Bool
 }
+
+// MARK: - Folder/Collection System
+
+struct ClipboardFolder: Identifiable, Codable {
+    var id = UUID()
+    var name: String
+    var createdAt: Date
+    var updatedAt: Date
+    var itemIds: [UUID] = [] // Encrypted item IDs stored in folder
+    var isEncrypted: Bool = true
+    
+    init(name: String) {
+        self.name = name
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+}
